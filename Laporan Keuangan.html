@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Laporan Keuangan - UD. Evario Mandiri Jaya</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
+      overflow: hidden;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1600px;
+      aspect-ratio: 16 / 9;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      padding: 12px;
+      display: grid;
+      grid-template-areas:
+        "header header header"
+        "summary balance cashflow"
+        "income expenses investors"
+        "footer footer footer";
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr auto;
+      gap: 8px;
+    }
+
+    header {
+      grid-area: header;
+      text-align: center;
+      padding: 8px;
+      background: linear-gradient(90deg, #1565c0, #42a5f5);
+      border-radius: 8px;
+      color: #fff;
+    }
+
+    header h1 {
+      font-size: 1.8em;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    header h1 i {
+      color: #fbc02d;
+      margin-right: 6px;
+      font-size: 1.2em;
+    }
+
+    header h2 {
+      font-size: 1.2em;
+      font-weight: 400;
+    }
+
+    header p {
+      font-size: 0.85em;
+      opacity: 0.9;
+    }
+
+    h3 {
+      font-size: 1em;
+      font-weight: 700;
+      color: #1565c0;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    h3 i {
+      color: #fbc02d;
+      margin-right: 6px;
+      font-size: 1.4em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #f5f5f5;
+      border-radius: 6px;
+      overflow: hidden;
+      animation: fadeIn 1s ease-out;
+    }
+
+    th, td {
+      padding: 5px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 0.85em;
+      color: #37474f;
+    }
+
+    th {
+      background: linear-gradient(90deg, #1976d2, #42a5f5);
+      color: #ffffff;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) {
+      background: #e3f2fd;
+    }
+
+    tr:hover {
+      background: #bbdefb;
+      transition: background 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .summary {
+      grid-area: summary;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-table {
+      margin-bottom: 6px;
+    }
+
+    .chart-container {
+      flex-grow: 1;
+      height: 120px;
+    }
+
+    .balance {
+      grid-area: balance;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+    }
+
+    .cashflow {
+      grid-area: cashflow;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+    }
+
+    .income {
+      grid-area: income;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+    }
+
+    .expenses {
+      grid-area: expenses;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+    }
+
+    .investors {
+      grid-area: investors;
+      padding: 8px;
+      background: #fff;
+      border-radius: 6px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bbdefb;
+    }
+
+    footer {
+      grid-area: footer;
+      text-align: center;
+      font-size: 0.75em;
+      color: #1565c0;
+      padding: 6px;
+      background: #e3f2fd;
+      border-radius: 6px;
+    }
+
+    footer p {
+      margin: 1px 0;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-areas:
+          "header"
+          "summary"
+          "balance"
+          "cashflow"
+          "income"
+          "expenses"
+          "investors"
+          "footer";
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto auto auto auto auto;
+        padding: 8px;
+        gap: 6px;
+      }
+
+      .summary-table, .chart-container {
+        width: 100%;
+        margin-bottom: 4px;
+      }
+
+      .chart-container {
+        height: 80px;
+      }
+
+      h3 {
+        font-size: 0.9em;
+      }
+
+      th, td {
+        font-size: 0.75em;
+        padding: 4px;
+      }
+
+      .summary, .balance, .cashflow, .income, .expenses, .investors {
+        padding: 6px;
+      }
+
+      header, footer {
+        padding: 6px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fa-solid fa-building"></i> UD. Evario Mandiri Jaya</h1>
+      <h2>Laporan Keuangan</h2>
+      <p>Periode: Januari - Desember 2024</p>
+    </header>
+    
+    <section class="summary">
+      <h3><i class="fa-solid fa-chart-line"></i> Ringkasan Keuangan</h3>
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Kategori</th>
+            <th>Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pendapatan Operasional</td>
+            <td>1.000.000.000</td>
+          </tr>
+          <tr>
+            <td>Pendapatan Non-Operasional</td>
+            <td>250.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Pendapatan</td>
+            <td>1.250.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Pengeluaran</td>
+            <td>830.000.000</td>
+          </tr>
+          <tr>
+            <td>Pajak Penghasilan</td>
+            <td>50.000.000</td>
+          </tr>
+          <tr>
+            <td>Laba Bersih</td>
+            <td>370.000.000</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="chart-container">
+        <canvas id="financialChart"></canvas>
+      </div>
+    </section>
+    
+    <section class="balance">
+      <h3><i class="fa-solid fa-balance-scale"></i> Laporan Neraca</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Kategori</th>
+            <th>Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Kas & Setara Kas</td>
+            <td>300.000.000</td>
+          </tr>
+          <tr>
+            <td>Piutang Usaha</td>
+            <td>350.000.000</td>
+          </tr>
+          <tr>
+            <td>Inventori</td>
+            <td>200.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Aset Lancar</td>
+            <td>900.000.000</td>
+          </tr>
+          <tr>
+            <td>Aset Tetap (Net)</td>
+            <td>600.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Aset</td>
+            <td>1.500.000.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <section class="cashflow">
+      <h3><i class="fa-solid fa-money-bill-transfer"></i> Laporan Arus Kas</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Kategori</th>
+            <th>Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Penerimaan Pelanggan</td>
+            <td>1.200.000.000</td>
+          </tr>
+          <tr>
+            <td>Pembayaran Supplier</td>
+            <td>-650.000.000</td>
+          </tr>
+          <tr>
+            <td>Arus Kas Operasi</td>
+            <td>350.000.000</td>
+          </tr>
+          <tr>
+            <td>Pembelian Aset Tetap</td>
+            <td>-150.000.000</td>
+          </tr>
+          <tr>
+            <td>Penerimaan Pinjaman</td>
+            <td>100.000.000</td>
+          </tr>
+          <tr>
+            <td>Saldo Akhir Kas</td>
+            <td>470.000.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <section class="income">
+      <h3><i class="fa-solid fa-money-bill-wave"></i> Rincian Pendapatan</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Sumber</th>
+            <th>Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Penjualan Produk Lokal</td>
+            <td>700.000.000</td>
+          </tr>
+          <tr>
+            <td>Penjualan Ekspor</td>
+            <td>200.000.000</td>
+          </tr>
+          <tr>
+            <td>Jasa Konsultasi</td>
+            <td>150.000.000</td>
+          </tr>
+          <tr>
+            <td>Royalti</td>
+            <td>50.000.000</td>
+          </tr>
+          <tr>
+            <td>Pendapatan Investasi</td>
+            <td>100.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Pendapatan</td>
+            <td>1.250.000.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <section class="expenses">
+      <h3><i class="fa-solid fa-credit-card"></i> Rincian Pengeluaran</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Jenis</th>
+            <th>Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Gaji Karyawan</td>
+            <td>300.000.000</td>
+          </tr>
+          <tr>
+            <td>Biaya Operasional</td>
+            <td>200.000.000</td>
+          </tr>
+          <tr>
+            <td>Sewa Gedung</td>
+            <td>100.000.000</td>
+          </tr>
+          <tr>
+            <td>Utilitas</td>
+            <td>80.000.000</td>
+          </tr>
+          <tr>
+            <td>Pemasaran</td>
+            <td>70.000.000</td>
+          </tr>
+          <tr>
+            <td>Total Pengeluaran</td>
+            <td>830.000.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <section class="investors">
+      <h3><i class="fa-solid fa-users"></i> Data Investor</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Kepemilikan (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>PT. Maju Jaya</td>
+            <td>35%</td>
+          </tr>
+          <tr>
+            <td>Budi Santoso</td>
+            <td>25%</td>
+          </tr>
+          <tr>
+            <td>Ani Rahayu</td>
+            <td>20%</td>
+          </tr>
+          <tr>
+            <td>CV. Sukses Abadi</td>
+            <td>10%</td>
+          </tr>
+          <tr>
+            <td>Dana Ventura XYZ</td>
+            <td>7%</td>
+          </tr>
+          <tr>
+            <td>Investor Publik</td>
+            <td>3%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    
+    <footer>
+      <p>Dibuat oleh: Bagian Keuangan UD. Evario Mandiri Jaya</p>
+      <p>Tanggal: 13 April 2025</p>
+    </footer>
+  </div>
+
+  <script>
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Pendapatan', 'Pengeluaran', 'Laba Bersih'],
+        datasets: [{
+          label: 'Jumlah (Rp)',
+          data: [1250000000, 830000000, 370000000],
+          backgroundColor: ['#1976d280', '#ef535080', '#4caf5080'],
+          borderColor: ['#1976d2', '#ef5350', '#4caf50'],
+          borderWidth: 1,
+          borderRadius: 4
+        }]
+      },
+      options: {
+        animation: {
+          duration: 1000,
+          easing: 'easeOutQuart'
+        },
+        scales: {
+          y: {
+            beginAtZero: true;
+            grid: { color: '#bbdefb' },
+            ticks: {
+              callback: function(value) {
+                return 'Rp ' + (value / 1000000) + 'M';
+              },
+              color: '#37474f',
+              font: { size: 10 }
+            },
+            max: 1500000000
+          },
+          x: {
+            grid: { display: false },
+            ticks: {
+              color: '#37474f',
+              font: { size: 10, weight: 'bold' }
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1565c0',
+            callbacks: {
+              label: function(context) {
+                return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
+              }
+            },
+            titleFont: { size: 10 },
+            bodyFont: { size: 10 }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
